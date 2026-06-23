@@ -32,12 +32,12 @@ jobs:
         run: |
           find src -name '*.xml' -print0 | xargs -0 -n1 xmllint --noout
 
-      - name: Build packages
+      - name: Build package
         run: bash build/build.sh
 
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: securityguard-packages
-          path: dist/*.zip
+          name: securityguard-package
+          path: pkg_securityguard-*.zip
           if-no-files-found: error

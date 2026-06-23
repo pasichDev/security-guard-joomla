@@ -29,17 +29,15 @@ the source into installable `.zip` archives.
 bash build/build.sh
 ```
 
-Produces in `dist/`:
+Produces a single archive in the repository root:
 
 | Artifact | Contents |
 | --- | --- |
-| `pkg_securityguard-<version>.zip` | Full package — install this in Joomla |
-| `com_securityguard.zip` | Component only |
-| `plg_system_securityguard.zip` | System plugin only |
+| `pkg_securityguard-<version>.zip` | Full package — installs the component and the system plugin together |
 
 The script reads the version from `src/pkg_securityguard.xml`. It uses the `zip` tool when
 available and otherwise falls back to Python's `zipfile`, so it runs on Linux, macOS and
-Windows.
+Windows. The archive is git-ignored and distributed only through GitHub Releases.
 
 ## Local checks
 
@@ -70,5 +68,5 @@ tells Joomla to install both bundled extensions.
 
 ## Manual installation for testing
 
-Install `dist/pkg_securityguard-<version>.zip` via **System → Install → Extensions → Upload
+Install `pkg_securityguard-<version>.zip` via **System → Install → Extensions → Upload
 Package File**, then enable **System – Security Guard** under **Extensions → Plugins**.

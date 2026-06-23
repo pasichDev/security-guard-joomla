@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 #
-# Build installable Joomla packages for Security Guard.
+# Build the installable Joomla package for Security Guard.
 #
-# Produces, in dist/:
-#   com_securityguard.zip               – the component
-#   plg_system_securityguard.zip        – the system plugin
-#   pkg_securityguard-<version>.zip      – the full package (component + plugin)
+# Produces a single archive in the repository root:
+#   pkg_securityguard-<version>.zip   – installs the component and the system
+#                                       plugin together in one step.
 #
 # Usage: bash build/build.sh
 #
@@ -13,7 +12,6 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC="$ROOT/src"
-DIST="$ROOT/dist"
 WORK="$ROOT/build/.work"
 
 # --- read version from the package manifest -------------------------------
@@ -24,6 +22,8 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 echo "Building Security Guard v$VERSION"
+
+OUTPUT="$ROOT/pkg_securityguard-$VERSION.zip"
 
 # --- portable "zip the contents of a dir at archive root" -----------------
 # Uses the `zip` tool when available, otherwise falls back to Python's
@@ -51,10 +51,11 @@ PY
 }
 
 # --- clean ----------------------------------------------------------------
-rm -rf "$DIST" "$WORK"
-mkdir -p "$DIST" "$WORK/packages"
+rm -f "$OUTPUT"
+rm -rf "$WORK"
+mkdir -p "$WORK/packages"
 
-# --- component & plugin zips (contents at archive root) -------------------
+# --- inner component & plugin zips (bundled inside the package) ------------
 zip_dir "$WORK/packages/com_securityguard.zip" "$SRC/com_securityguard"
 zip_dir "$WORK/packages/plg_system_securityguard.zip" "$SRC/plg_system_securityguard"
 
@@ -64,14 +65,9 @@ if [ -d "$SRC/language" ]; then
     cp -r "$SRC/language" "$WORK/language"
 fi
 
-# --- package zip ----------------------------------------------------------
-zip_dir "$DIST/pkg_securityguard-$VERSION.zip" "$WORK"
-
-# --- expose the inner zips as standalone artifacts too --------------------
-cp "$WORK/packages/com_securityguard.zip" "$DIST/com_securityguard.zip"
-cp "$WORK/packages/plg_system_securityguard.zip" "$DIST/plg_system_securityguard.zip"
+# --- single installable package zip ---------------------------------------
+zip_dir "$OUTPUT" "$WORK"
 
 rm -rf "$WORK"
 
-echo "Done. Artifacts in dist/:"
-ls -1 "$DIST"
+echo "Done: $(basename "$OUTPUT")"

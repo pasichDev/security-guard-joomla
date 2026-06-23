@@ -32,22 +32,18 @@ for new releases automatically.
 
 ## Building from source
 
-Plain PHP — no compilation. The build assembles the source in `src/` into installable zips.
+Plain PHP — no compilation. The build assembles the source in `src/` into a single
+installable archive `pkg_securityguard-<version>.zip` in the repository root. That one
+package installs both the component and the system plugin.
 
 ```bash
 bash build/build.sh
 ```
 
-Output in `dist/`:
-
-| Artifact | Contents |
-| --- | --- |
-| `pkg_securityguard-<version>.zip` | Full package (install this in Joomla) |
-| `com_securityguard.zip` | Component only |
-| `plg_system_securityguard.zip` | System plugin only |
-
 The build uses the `zip` tool when available and falls back to Python, so it runs on Linux,
-macOS and Windows alike.
+macOS and Windows alike. Releases are distributed only through
+[GitHub Releases](https://github.com/pasichDev/security-guard-joomla/releases) — there is no
+checked-in build output.
 
 ## Repository layout
 
@@ -67,8 +63,8 @@ docs/                         documentation (English)
 - **CI** lints PHP (`php -l`), validates XML manifests, and builds the packages on every
   push and pull request.
 - **Release** is triggered by pushing a `vX.Y.Z` tag: it verifies the tag matches the
-  manifest version, builds the zips, publishes a GitHub Release, and updates the Joomla
-  update server on GitHub Pages.
+  manifest version, builds the package, publishes a GitHub Release with the single archive,
+  and updates the Joomla update server on GitHub Pages.
 
 ## Contributing
 

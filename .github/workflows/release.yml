@@ -44,7 +44,7 @@ jobs:
       - name: Validate XML manifests
         run: find src -name '*.xml' -print0 | xargs -0 -n1 xmllint --noout
 
-      - name: Build packages
+      - name: Build package
         run: bash build/build.sh
 
       - name: Generate update server XML
@@ -61,10 +61,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            dist/pkg_securityguard-${{ steps.ver.outputs.version }}.zip
-            dist/com_securityguard.zip
-            dist/plg_system_securityguard.zip
+          files: pkg_securityguard-${{ steps.ver.outputs.version }}.zip
           generate_release_notes: true
 
       - name: Publish update XML to GitHub Pages

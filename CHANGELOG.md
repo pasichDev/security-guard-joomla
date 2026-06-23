@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Public repository layout: source unpacked into `src/`.
-- `build/build.sh` to assemble installable packages (zip tool with Python fallback).
+- `build/build.sh` to assemble a single installable package archive (zip tool with Python fallback).
+- Distribution exclusively through GitHub Releases — no checked-in build output.
 - GitHub Actions CI (PHP lint, XML validation, package build) and release automation.
 - Joomla update server (`updates.xml`) published to GitHub Pages for in-admin auto-updates.
 - Bilingual README (English + Ukrainian) and English documentation under `docs/`.
