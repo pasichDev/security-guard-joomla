@@ -3,6 +3,7 @@
 
 # Shell scripts must keep LF or bash breaks on Windows checkouts
 *.sh text eol=lf
+.husky/* text eol=lf
 
 # Treat archives as binary
 *.zip binary

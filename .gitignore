@@ -8,6 +8,9 @@ CLAUDE.md
 /.claude/
 /docs/superpowers/
 
+# Node tooling (semantic-release, commitlint, husky)
+/node_modules/
+
 # OS / editor
 .DS_Store
 Thumbs.db

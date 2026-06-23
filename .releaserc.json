@@ -1,0 +1,43 @@
+{
+  "branches": ["main"],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md",
+        "changelogTitle": "# Changelog\n\nAll notable changes are generated automatically from commit messages,\nfollowing [Conventional Commits](https://www.conventionalcommits.org/)."
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "bash build/bump-version.sh ${nextRelease.version} && bash build/build.sh && bash build/render-updates.sh ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "pkg_securityguard-*.zip",
+            "label": "Installable Joomla package (component + system plugin)"
+          }
+        ]
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "CHANGELOG.md",
+          "src/pkg_securityguard.xml",
+          "src/com_securityguard/securityguard.xml",
+          "src/plg_system_securityguard/securityguard.xml"
+        ],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ]
+  ]
+}
