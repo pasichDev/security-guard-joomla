@@ -60,16 +60,28 @@ docs/                         documentation (English)
 
 ## Releases & CI
 
-- **CI** lints PHP (`php -l`), validates XML manifests, and builds the packages on every
-  push and pull request.
-- **Release** is triggered by pushing a `vX.Y.Z` tag: it verifies the tag matches the
-  manifest version, builds the package, publishes a GitHub Release with the single archive,
-  and updates the Joomla update server on GitHub Pages.
+- **CI** lints PHP (`php -l`), validates XML manifests, and builds the package on every push
+  and pull request; **Commit Lint** validates commit messages on pull requests.
+- **Releases are automated** with [semantic-release](https://semantic-release.gitbook.io/):
+  pushing [Conventional Commits](https://www.conventionalcommits.org/) to `main` computes
+  the next version, bumps the manifests, updates the changelog, publishes a GitHub Release
+  with the package, and refreshes the Joomla update server on GitHub Pages. No manual tags.
 
 ## Contributing
 
-See [docs/](docs/) for development and release documentation. Issues and pull requests are
-welcome.
+Commits follow [Conventional Commits](docs/commit-convention.md) and drive automated
+releases. See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/](docs/). Issues and pull
+requests are welcome.
+
+## Support
+
+If this project helps secure your site, you can support its development:
+
+- ☕ Ko-fi — https://ko-fi.com/pasichdev
+- 💝 Donatello — https://donatello.to/pasichDev
+
+For questions, the best way to reach the author is by email:
+**[apasichnik9@gmail.com](mailto:apasichnik9@gmail.com)** — or open an issue.
 
 ## License
 

@@ -60,15 +60,28 @@ docs/                         документація (англійською)
 
 ## Релізи та CI
 
-- **CI** перевіряє PHP (`php -l`), валідує XML-маніфести й збирає пакети на кожен push
-  та pull request.
-- **Реліз** запускається push-ом тегу `vX.Y.Z`: перевіряє відповідність тега й версії в
-  маніфесті, збирає пакет, публікує GitHub Release з єдиним архівом та оновлює сервер
-  оновлень Joomla на GitHub Pages.
+- **CI** перевіряє PHP (`php -l`), валідує XML-маніфести й збирає пакет на кожен push та
+  pull request; **Commit Lint** перевіряє повідомлення комітів на pull request-ах.
+- **Релізи автоматичні** через [semantic-release](https://semantic-release.gitbook.io/):
+  push [Conventional Commits](https://www.conventionalcommits.org/) у `main` обчислює
+  наступну версію, апає маніфести, оновлює змінлог, публікує GitHub Release з пакетом і
+  оновлює сервер оновлень Joomla на GitHub Pages. Жодних ручних тегів.
 
 ## Внесок
 
-Дивіться [docs/](docs/) щодо розробки та релізів. Issues та pull request-и вітаються.
+Коміти дотримуються [Conventional Commits](docs/commit-convention.md) і керують
+автоматичними релізами. Дивіться [CONTRIBUTING.md](CONTRIBUTING.md) та [docs/](docs/).
+Issues та pull request-и вітаються.
+
+## Підтримка
+
+Якщо проєкт допомагає захищати ваш сайт — можете підтримати його розвиток:
+
+- ☕ Ko-fi — https://ko-fi.com/pasichdev
+- 💝 Donatello — https://donatello.to/pasichDev
+
+З питань найкраще писати автору на пошту:
+**[apasichnik9@gmail.com](mailto:apasichnik9@gmail.com)** — або відкрийте issue.
 
 ## Ліцензія
 
