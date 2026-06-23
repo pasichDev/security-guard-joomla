@@ -45,8 +45,8 @@ $now = time();
                     <td><small><?php echo htmlspecialchars(substr($item->last_url ?? '', 0, 80)); ?></small></td>
                     <td>
                         <button type="button"
-                                class="btn btn-small btn-warning"
-                                onclick="if(confirm('Unblock <?php echo htmlspecialchars($item->ip); ?>?')) { document.getElementById('sg-unblock-ip').value = <?php echo json_encode($item->ip); ?>; Joomla.submitform('unblock', document.getElementById('adminForm')); }">
+                                class="btn btn-small btn-warning sg-unblock-btn"
+                                data-ip="<?php echo htmlspecialchars($item->ip, ENT_QUOTES, 'UTF-8'); ?>">
                             <?php echo JText::_('COM_SECURITYGUARD_UNBLOCK'); ?>
                         </button>
                     </td>
@@ -64,3 +64,20 @@ $now = time();
     <?php echo JHtml::_('form.token'); ?>
 </div>
 </form>
+
+<script>
+(function () {
+    var form = document.getElementById('adminForm');
+    var ipField = document.getElementById('sg-unblock-ip');
+    if (!form || !ipField) { return; }
+    form.addEventListener('click', function (e) {
+        var btn = e.target.closest ? e.target.closest('.sg-unblock-btn') : null;
+        if (!btn) { return; }
+        var ip = btn.getAttribute('data-ip') || '';
+        if (window.confirm('Unblock ' + ip + '?')) {
+            ipField.value = ip;
+            Joomla.submitform('unblock', form);
+        }
+    });
+})();
+</script>

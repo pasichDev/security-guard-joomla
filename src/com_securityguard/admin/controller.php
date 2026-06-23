@@ -7,6 +7,9 @@ class SecurityguardController extends JControllerLegacy
 
     public function display($cachable = false, $urlparams = array())
     {
+        if (!JFactory::getUser()->authorise('core.manage', 'com_securityguard')) {
+            jexit(JText::_('JERROR_ALERTNOAUTHOR'));
+        }
         $view = $this->input->get('view', 'dashboard');
         $this->input->set('view', $view);
         parent::display($cachable, $urlparams);
@@ -15,6 +18,9 @@ class SecurityguardController extends JControllerLegacy
 
     public function unblock()
     {
+        if (!JFactory::getUser()->authorise('core.manage', 'com_securityguard')) {
+            jexit(JText::_('JERROR_ALERTNOAUTHOR'));
+        }
         // v1.3.11: POST submit (more reliable than GET-link)
         // Accept token from POST OR GET (for backward-compat)
         if (!JSession::checkToken('post') && !JSession::checkToken('get')) {
@@ -41,6 +47,9 @@ class SecurityguardController extends JControllerLegacy
 
     public function clearBlocks()
     {
+        if (!JFactory::getUser()->authorise('core.manage', 'com_securityguard')) {
+            jexit(JText::_('JERROR_ALERTNOAUTHOR'));
+        }
         JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
         $db = JFactory::getDbo();
         $query = $db->getQuery(true)->delete($db->quoteName('#__securityguard_blocks'));
@@ -54,6 +63,9 @@ class SecurityguardController extends JControllerLegacy
 
     public function clearLogs()
     {
+        if (!JFactory::getUser()->authorise('core.manage', 'com_securityguard')) {
+            jexit(JText::_('JERROR_ALERTNOAUTHOR'));
+        }
         JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
         $db = JFactory::getDbo();
         $query = $db->getQuery(true)->delete($db->quoteName('#__securityguard_log'));
@@ -67,6 +79,9 @@ class SecurityguardController extends JControllerLegacy
 
     public function cleanup()
     {
+        if (!JFactory::getUser()->authorise('core.manage', 'com_securityguard')) {
+            jexit(JText::_('JERROR_ALERTNOAUTHOR'));
+        }
         JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
         $db = JFactory::getDbo();
         $now = time();
@@ -129,6 +144,9 @@ class SecurityguardController extends JControllerLegacy
 
     public function clearHoneypot()
     {
+        if (!JFactory::getUser()->authorise('core.manage', 'com_securityguard')) {
+            jexit(JText::_('JERROR_ALERTNOAUTHOR'));
+        }
         JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
         $db = JFactory::getDbo();
         $query = $db->getQuery(true)->delete($db->quoteName('#__securityguard_honeypot'));
@@ -142,6 +160,9 @@ class SecurityguardController extends JControllerLegacy
 
     public function resetScores()
     {
+        if (!JFactory::getUser()->authorise('core.manage', 'com_securityguard')) {
+            jexit(JText::_('JERROR_ALERTNOAUTHOR'));
+        }
         JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
         $db = JFactory::getDbo();
         $query = $db->getQuery(true)->delete($db->quoteName('#__securityguard_scores'));
