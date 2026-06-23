@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="3.10" method="upgrade">
+    <name>com_securityguard</name>
+    <author>pasichDev</author>
+    <creationDate>2026-06-16</creationDate>
+    <copyright>(C) 2026 pasichDev</copyright>
+    <license>GNU GPL v2 or later</license>
+    <version>1.3.12</version>
+    <description>COM_SECURITYGUARD_DESCRIPTION</description>
+
+    <install>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
+        </sql>
+    </install>
+    <uninstall>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
+        </sql>
+    </uninstall>
+    <update>
+        <schemas>
+            <schemapath type="mysql">sql/updates/mysql</schemapath>
+        </schemas>
+    </update>
+
+    <files folder="site">
+        <filename>index.html</filename>
+    </files>
+
+    <administration>
+        <menu img="class:cogs">COM_SECURITYGUARD</menu>
+        <files folder="admin">
+            <filename>index.html</filename>
+            <filename>securityguard.php</filename>
+            <filename>controller.php</filename>
+            <filename>config.xml</filename>
+            <filename>access.xml</filename>
+            <folder>helpers</folder>
+            <folder>language</folder>
+            <folder>models</folder>
+            <folder>sql</folder>
+            <folder>views</folder>
+        </files>
+        <languages folder="admin/language">
+            <language tag="en-GB">en-GB/en-GB.com_securityguard.ini</language>
+            <language tag="en-GB">en-GB/en-GB.com_securityguard.sys.ini</language>
+            <language tag="uk-UA">uk-UA/uk-UA.com_securityguard.ini</language>
+            <language tag="uk-UA">uk-UA/uk-UA.com_securityguard.sys.ini</language>
+        </languages>
+    </administration>
+
+    <media destination="com_securityguard" folder="media">
+        <filename>index.html</filename>
+        <folder>css</folder>
+        <folder>js</folder>
+    </media>
+</extension>

@@ -1,0 +1,2 @@
+-- v1.3.1 security patch: no schema changes
+-- Only PHP code fixes (IP spoofing, static resource skip, bot scoring)

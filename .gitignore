@@ -1,0 +1,16 @@
+# Build output
+/dist/
+/public/
+/build/.work/
+
+# Claude / AI workflow files — never committed
+CLAUDE.md
+/.claude/
+/docs/superpowers/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+*.log

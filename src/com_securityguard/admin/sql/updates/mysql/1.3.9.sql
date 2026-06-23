@@ -1,0 +1,1 @@
+-- v1.3.9: Block escalation + RETURN throttle (no schema changes)

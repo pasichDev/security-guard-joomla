@@ -1,0 +1,1 @@
+-- v1.3.10: Fix unblock CSRF token (GET-based check)

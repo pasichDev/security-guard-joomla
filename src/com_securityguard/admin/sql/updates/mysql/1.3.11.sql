@@ -1,0 +1,1 @@
+-- v1.3.11: Unblock button — POST form submit instead of GET link

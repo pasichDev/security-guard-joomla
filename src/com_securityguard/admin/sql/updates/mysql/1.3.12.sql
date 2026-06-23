@@ -1,0 +1,1 @@
+-- v1.3.12: Fix HTTP 500 in Traffic Monitor (missing $db init)

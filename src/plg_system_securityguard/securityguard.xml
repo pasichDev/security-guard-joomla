@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.10" type="plugin" group="system" method="upgrade">
+    <name>plg_system_securityguard</name>
+    <author>pasichDev</author>
+    <creationDate>2026-06-16</creationDate>
+    <copyright>(C) 2026 pasichDev</copyright>
+    <license>GNU GPL v2 or later</license>
+    <version>1.3.12</version>
+    <description>PLG_SYSTEM_SECURITYGUARD_DESCRIPTION</description>
+
+    <files>
+        <filename plugin="securityguard">securityguard.php</filename>
+        <folder>language</folder>
+    </files>
+
+    <languages folder="language">
+        <language tag="en-GB">en-GB/en-GB.plg_system_securityguard.ini</language>
+        <language tag="en-GB">en-GB/en-GB.plg_system_securityguard.sys.ini</language>
+        <language tag="uk-UA">uk-UA/uk-UA.plg_system_securityguard.ini</language>
+        <language tag="uk-UA">uk-UA/uk-UA.plg_system_securityguard.sys.ini</language>
+    </languages>
+
+    <config>
+        <fields name="params">
+            <fieldset name="security" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_SECURITY">
+                <field name="trust_cloudflare" type="radio" class="btn-group btn-group-yesno" default="0"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_TRUST_CF"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_TRUST_CF_DESC">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="trusted_proxies" type="textarea" rows="3" cols="50" default=""
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_TRUSTED_PROXIES"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_TRUSTED_PROXIES_DESC"
+                       filter="raw" />
+                <field name="skip_score_for_bots" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_SKIP_BOT_SCORE"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_SKIP_BOT_SCORE_DESC">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="track_body_size" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_TRACK_BODY"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_TRACK_BODY_DESC">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+            </fieldset>
+
+            <fieldset name="basic" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_BASIC">
+                <field name="enabled" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_ENABLED">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="block_duration" type="number" default="3600"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BLOCK_DURATION" min="60" max="86400" />
+                <field name="rate_limit" type="number" default="60"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_RATE_LIMIT" min="10" max="1000" />
+                <field name="rate_window" type="number" default="60"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_RATE_WINDOW" min="10" max="3600" />
+            </fieldset>
+
+            <fieldset name="traffic" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_TRAFFIC">
+                <field name="traffic_monitor" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_TRAFFIC_ON"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_TRAFFIC_ON_DESC">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="traffic_interval" type="list" default="300"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_TRAFFIC_INTERVAL"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_TRAFFIC_INTERVAL_DESC">
+                    <option value="60">1 min</option>
+                    <option value="300">5 min</option>
+                    <option value="900">15 min</option>
+                </field>
+                <field name="traffic_retention_days" type="number" default="30"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_TRAFFIC_RETENTION" min="1" max="365" />
+                <field name="geo_lookup" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_GEO_LOOKUP">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+            </fieldset>
+
+            <fieldset name="alerts" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_ALERTS">
+                <field name="alert_ddos" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_ALERT_DDOS"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_ALERT_DDOS_DESC">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="ddos_multiplier" type="number" default="3"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_DDOS_MULTIPLIER"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_DDOS_MULTIPLIER_DESC"
+                       min="1" max="20" />
+                <field name="ddos_min_requests" type="number" default="100"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_DDOS_MIN_REQ" min="10" max="10000" />
+
+                <field name="auto_block_burst" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_AUTOBLOCK_BURST"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_AUTOBLOCK_BURST_DESC">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="burst_threshold" type="number" default="50"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BURST_THRESHOLD"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_BURST_THRESHOLD_DESC"
+                       min="10" max="500" />
+
+                <field name="alert_slow" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_ALERT_SLOW">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="slow_threshold_ms" type="number" default="2000"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_SLOW_THRESHOLD"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_SLOW_THRESHOLD_DESC"
+                       min="100" max="60000" />
+            </fieldset>
+
+            <fieldset name="bots" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_BOTS">
+                <field name="allow_search_bots" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_ALLOW_BOTS">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="rdns_verify" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_RDNS">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="block_fake_bots" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_FAKE_BOTS">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+            </fieldset>
+
+            <fieldset name="whitelist" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_WHITELIST">
+                <field name="whitelist_ips" type="textarea" rows="5" cols="60"
+                       default="45.158.247.&#10;92.52.152.&#10;46.201.131.&#10;127.0.0."
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_WHITELIST"
+                       filter="raw" />
+                <field name="admin_whitelist_only" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_ADMIN_WHITELIST">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+            </fieldset>
+
+            <fieldset name="protections" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_PROTECTIONS">
+                <field name="block_jce_exploit" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BLOCK_JCE">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="phpprobe_enabled" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_PHPPROBE"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_PHPPROBE_DESC">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="phpprobe_threshold" type="number" default="5"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_PHPPROBE_THRESHOLD"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_PHPPROBE_THRESHOLD_DESC"
+                       min="2" max="50" />
+                <field name="phpprobe_window" type="number" default="10"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_PHPPROBE_WINDOW"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_PHPPROBE_WINDOW_DESC"
+                       min="1" max="600" />
+                <field name="block_com_ajax" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BLOCK_COM_AJAX">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="block_registration" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BLOCK_REGISTRATION">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="block_sql_injection" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BLOCK_SQLI">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="block_bad_user_agents" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BLOCK_UA">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="block_country_cn" type="radio" class="btn-group btn-group-yesno" default="0"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BLOCK_CN">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="block_country_ru" type="radio" class="btn-group btn-group-yesno" default="0"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BLOCK_RU">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+            </fieldset>
+
+            <fieldset name="honeypot" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_HONEYPOT">
+                <field name="honeypot_enabled" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_HONEYPOT_ENABLED">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="honeypot_custom_urls" type="textarea" rows="5" cols="60" default=""
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_HONEYPOT_URLS"
+                       filter="raw" />
+            </fieldset>
+
+            <fieldset name="scoring" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_SCORING">
+                <field name="behavior_scoring" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BEHAVIOR">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="behavior_threshold" type="number" default="25"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_THRESHOLD" min="10" max="100" />
+            </fieldset>
+
+            <fieldset name="advanced" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_ADVANCED">
+                <field name="log_attacks" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_LOG">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="auto_cleanup_days" type="number" default="30"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_CLEANUP_DAYS" min="1" max="365" />
+                <field name="response_code" type="list" default="404"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_RESPONSE_CODE">
+                    <option value="403">403 Forbidden</option>
+                    <option value="404">404 Not Found</option>
+                    <option value="429">429 Too Many Requests</option>
+                    <option value="503">503 Service Unavailable</option>
+                </field>
+                <field name="return_log_throttle_min" type="number" default="10"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_RETURN_THROTTLE"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_RETURN_THROTTLE_DESC"
+                       min="0" max="1440" />
+            </fieldset>
+        </fields>
+    </config>
+</extension>

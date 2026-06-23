@@ -1,0 +1,2 @@
+-- v1.3.3: PHP probe burst detector + extended webshell patterns
+-- Uses existing _rate table (no schema changes)

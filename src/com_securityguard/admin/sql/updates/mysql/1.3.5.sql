@@ -1,0 +1,2 @@
+-- v1.3.5: Aggressive .php blocking + PHP burst fix + score TTL cleanup + geo expansion
+-- No schema changes

@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS `#__securityguard_blocks`;
+DROP TABLE IF EXISTS `#__securityguard_log`;
+DROP TABLE IF EXISTS `#__securityguard_rate`;
+DROP TABLE IF EXISTS `#__securityguard_whitelist`;
+DROP TABLE IF EXISTS `#__securityguard_scores`;
+DROP TABLE IF EXISTS `#__securityguard_honeypot`;
+DROP TABLE IF EXISTS `#__securityguard_bot_cache`;
+DROP TABLE IF EXISTS `#__securityguard_traffic`;
+DROP TABLE IF EXISTS `#__securityguard_ip_counters`;
+DROP TABLE IF EXISTS `#__securityguard_url_stats`;
+DROP TABLE IF EXISTS `#__securityguard_country_stats`;
+DROP TABLE IF EXISTS `#__securityguard_alerts`;
+DROP TABLE IF EXISTS `#__securityguard_geo_cache`;

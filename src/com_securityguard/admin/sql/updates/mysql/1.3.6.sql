@@ -1,0 +1,1 @@
+-- v1.3.6: Logs filter + status badges (no schema changes)
