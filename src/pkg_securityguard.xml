@@ -6,7 +6,7 @@
     <copyright>(C) 2026 pasichDev</copyright>
     <license>GNU GPL v2 or later</license>
     <packagename>securityguard</packagename>
-    <version>1.3.13</version>
+    <version>1.4.0</version>
     <url>https://github.com/pasichDev/security-guard-joomla</url>
     <packager>pasichDev</packager>
     <description>Complete WAF for Joomla 3.10 v1.3 — WAF + Honeypot + Behavior Scoring + Live Dashboard + Traffic Monitor (Grafana-style) + DDoS detection + Geo-tracking.</description>
