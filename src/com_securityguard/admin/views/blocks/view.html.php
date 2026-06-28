@@ -31,6 +31,8 @@ class SecurityguardViewBlocks extends JViewLegacy
             'COM_SECURITYGUARD_CLEAR_ALL_BLOCKS', false);
         JToolbarHelper::custom('cleanup', 'eraser', 'eraser',
             'COM_SECURITYGUARD_CLEANUP_EXPIRED', false);
+        JToolbarHelper::custom('unblockMyIp', 'checkin', 'checkin',
+            'COM_SECURITYGUARD_UNBLOCK_MY_IP', false);
         JToolbarHelper::preferences('com_securityguard');
     }
 }

@@ -42,6 +42,9 @@
                        description="PLG_SYSTEM_SECURITYGUARD_FIELD_TRACK_BODY_DESC">
                     <option value="1">JYES</option><option value="0">JNO</option>
                 </field>
+                <field name="bypass_token" type="text" default="" size="40" filter="raw"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BYPASS_TOKEN"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_BYPASS_TOKEN_DESC" />
             </fieldset>
 
             <fieldset name="basic" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_BASIC">
@@ -147,6 +150,15 @@
                        label="PLG_SYSTEM_SECURITYGUARD_FIELD_WHITELIST"
                        description="PLG_SYSTEM_SECURITYGUARD_FIELD_WHITELIST_DESC"
                        filter="raw" />
+                <field name="trust_superadmin" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_TRUST_SUPERADMIN"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_TRUST_SUPERADMIN_DESC">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="trust_superadmin_days" type="number" default="7"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_TRUST_SUPERADMIN_DAYS"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_TRUST_SUPERADMIN_DAYS_DESC"
+                       min="1" max="365" showon="trust_superadmin:1" />
             </fieldset>
 
             <fieldset name="protections" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_PROTECTIONS">

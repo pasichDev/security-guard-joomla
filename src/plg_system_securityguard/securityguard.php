@@ -335,8 +335,33 @@ class PlgSystemSecurityguard extends JPlugin
         }
 
         try {
-            // 1. Whitelist (manual)
+            // 0. Emergency bypass: ?sg_pass=<secret> instantly clears this IP's
+            // block. Lifesaver when you lock yourself out and have no DB access.
+            $bypass = (string)$this->params->get('bypass_token', '');
+            if ($bypass !== '' && isset($_GET['sg_pass'])
+                && hash_equals($bypass, (string)$_GET['sg_pass'])) {
+                $this->emergencyUnblock();
+                return;
+            }
+
+            // 1. Whitelist (manual + loopback + auto-trusted Super User)
             if ($this->isWhitelisted()) {
+                return;
+            }
+
+            // 1.5. TRUST THE JOOMLA BACKEND.
+            // Never run the offensive auto-block heuristics against the
+            // /administrator app. A logged-in admin clicking around fires many
+            // /administrator/index.php requests that otherwise look like a
+            // PHP-probe burst (5 .php hits in 10s) or push the behavior score
+            // over the limit — self-blocking the admin for 7 days. Admin-login
+            // brute force is handled separately in onUserLoginFailure(). We still
+            // honour an existing block so a known-bad IP can't reach the login.
+            if ($this->isAdminClient()) {
+                if ($block = $this->isBlocked()) {
+                    $this->incrementBlockAttempts((int)$block['id']);
+                    $this->denyAccess('Already blocked: ' . $block['reason']);
+                }
                 return;
             }
 
@@ -511,6 +536,94 @@ class PlgSystemSecurityguard extends JPlugin
         } catch (Exception $e) {
             JLog::add('SecurityGuard: ' . $e->getMessage(), JLog::ERROR, 'plg_securityguard');
         }
+    }
+
+    /**
+     * When a Super User logs in successfully, remember their IP as trusted for a
+     * while (TTL) so the WAF never locks them out while they work, and clear any
+     * active block on that IP. Opt-out via the trust_superadmin param.
+     */
+    public function onUserAfterLogin($options = array())
+    {
+        if (!$this->params->get('trust_superadmin', 1)) {
+            return;
+        }
+        try {
+            $user = (isset($options['user']) && $options['user'] instanceof JUser)
+                ? $options['user']
+                : JFactory::getUser();
+            if (!$user || $user->guest || !$user->authorise('core.admin')) {
+                return; // only full Super Users
+            }
+            $this->trustCurrentIp();
+        } catch (Exception $e) {
+            JLog::add('SecurityGuard: ' . $e->getMessage(), JLog::ERROR, 'plg_securityguard');
+        }
+    }
+
+    /**
+     * Remove this IP from the block list (used by the ?sg_pass bypass).
+     */
+    private function emergencyUnblock()
+    {
+        try {
+            $q = $this->db->getQuery(true)
+                ->delete($this->db->quoteName('#__securityguard_blocks'))
+                ->where($this->db->quoteName('ip') . ' = ' . $this->db->quote($this->ip));
+            $this->db->setQuery($q);
+            $this->db->execute();
+
+            $q = $this->db->getQuery(true)
+                ->delete($this->db->quoteName('#__securityguard_scores'))
+                ->where($this->db->quoteName('ip') . ' = ' . $this->db->quote($this->ip));
+            $this->db->setQuery($q);
+            $this->db->execute();
+        } catch (Exception $e) {}
+        $this->logAttack('EMERGENCY_BYPASS', 'UNBLOCK');
+    }
+
+    /**
+     * Mark the current IP as auto-trusted (Super User) and drop any active block.
+     * Stored in #__securityguard_whitelist (description 'sg-auto'); TTL enforced
+     * in isAutoTrusted().
+     */
+    private function trustCurrentIp()
+    {
+        try {
+            // Don't fight a working admin — clear any active block first
+            $q = $this->db->getQuery(true)
+                ->delete($this->db->quoteName('#__securityguard_blocks'))
+                ->where($this->db->quoteName('ip') . ' = ' . $this->db->quote($this->ip));
+            $this->db->setQuery($q);
+            $this->db->execute();
+
+            // Upsert the trusted entry (full IP), refreshing its timestamp
+            $q = $this->db->getQuery(true)
+                ->select('id')
+                ->from($this->db->quoteName('#__securityguard_whitelist'))
+                ->where($this->db->quoteName('ip_prefix') . ' = ' . $this->db->quote($this->ip));
+            $this->db->setQuery($q);
+            $exists = $this->db->loadResult();
+
+            if ($exists) {
+                $q = $this->db->getQuery(true)
+                    ->update($this->db->quoteName('#__securityguard_whitelist'))
+                    ->set($this->db->quoteName('created_at') . ' = NOW()')
+                    ->set($this->db->quoteName('description') . ' = ' . $this->db->quote('sg-auto'))
+                    ->where($this->db->quoteName('id') . ' = ' . (int)$exists);
+            } else {
+                $q = $this->db->getQuery(true)
+                    ->insert($this->db->quoteName('#__securityguard_whitelist'))
+                    ->columns([
+                        $this->db->quoteName('ip_prefix'),
+                        $this->db->quoteName('description'),
+                        $this->db->quoteName('created_at'),
+                    ])
+                    ->values($this->db->quote($this->ip) . ', ' . $this->db->quote('sg-auto') . ', NOW()');
+            }
+            $this->db->setQuery($q);
+            $this->db->execute();
+        } catch (Exception $e) {}
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -697,17 +810,64 @@ class PlgSystemSecurityguard extends JPlugin
     // Standard checks (same as v1.1)
     // ════════════════════════════════════════════════════════════════════════
 
+    /**
+     * Is this request hitting the Joomla administrator (backend) application?
+     */
+    private function isAdminClient()
+    {
+        if (method_exists($this->app, 'isClient')) {
+            return $this->app->isClient('administrator');
+        }
+        if (method_exists($this->app, 'isAdmin')) {
+            return (bool)$this->app->isAdmin();
+        }
+        // Fallback: detect by URI
+        $uri = $_SERVER['REQUEST_URI'] ?? '';
+        return (bool)preg_match('#/administrator(/|\?|$)#i', $uri);
+    }
+
     private function isWhitelisted()
     {
+        // Always trust loopback (local CLI, cron, same-server requests)
+        if ($this->ip === '127.0.0.1' || $this->ip === '::1') {
+            return true;
+        }
+        // Manual prefix list
         $whitelist = $this->params->get('whitelist_ips', '');
-        if (empty($whitelist)) return false;
-        $prefixes = preg_split('/[\r\n,]+/', trim($whitelist));
-        foreach ($prefixes as $prefix) {
-            $prefix = trim($prefix);
-            if (!empty($prefix) && strpos($this->ip, $prefix) === 0) {
-                return true;
+        if (!empty($whitelist)) {
+            $prefixes = preg_split('/[\r\n,]+/', trim($whitelist));
+            foreach ($prefixes as $prefix) {
+                $prefix = trim($prefix);
+                if (!empty($prefix) && strpos($this->ip, $prefix) === 0) {
+                    return true;
+                }
             }
         }
+        // Auto-trusted Super User IP (set on successful login, TTL-limited)
+        if ($this->params->get('trust_superadmin', 1) && $this->isAutoTrusted()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Is this IP an auto-trusted Super User IP that hasn't expired yet?
+     * Stored in #__securityguard_whitelist with description 'sg-auto'.
+     */
+    private function isAutoTrusted()
+    {
+        $ttlDays = (int)$this->params->get('trust_superadmin_days', 7);
+        if ($ttlDays <= 0) $ttlDays = 7;
+        try {
+            $q = $this->db->getQuery(true)
+                ->select('id')
+                ->from($this->db->quoteName('#__securityguard_whitelist'))
+                ->where($this->db->quoteName('ip_prefix') . ' = ' . $this->db->quote($this->ip))
+                ->where($this->db->quoteName('description') . ' = ' . $this->db->quote('sg-auto'))
+                ->where($this->db->quoteName('created_at') . ' > DATE_SUB(NOW(), INTERVAL ' . $ttlDays . ' DAY)');
+            $this->db->setQuery($q);
+            return (bool)$this->db->loadResult();
+        } catch (Exception $e) {}
         return false;
     }
 
@@ -897,8 +1057,9 @@ class PlgSystemSecurityguard extends JPlugin
             return false;
         }
 
-        // Skip legitimate /index.php and /configuration.php
-        if (preg_match('/^\/(index|configuration)\.php($|\?)/i', $path)) {
+        // Skip legitimate index.php / configuration.php in ANY directory —
+        // covers /administrator/index.php and subfolder installs (/site/index.php)
+        if (preg_match('#(^|/)(index|configuration)\.php$#i', $path)) {
             return false;
         }
 
@@ -983,7 +1144,9 @@ class PlgSystemSecurityguard extends JPlugin
         if (preg_match('/(\.php|\.asp|\.cgi|\.jsp)\?/i', $url) && empty($_SERVER['HTTP_REFERER'])) {
             $points += 3; $events[] = 'PHP_NO_REFERER';
         }
-        if (preg_match('/\/(admin|wp-|phpmyadmin|setup|install|backup|test)/i', $url)) {
+        // Known scanner/probe paths only — narrow patterns so legitimate
+        // frontend slugs containing "admin"/"test"/"backup" don't accrue points.
+        if (preg_match('#(?:^|/)(?:wp-admin|wp-login|wp-includes|wp-content|phpmyadmin|myadmin|adminer|setup\.php|install\.php|\.env|\.git)(?:/|$|\?|\.)#i', $url)) {
             $points += 2; $events[] = 'PROBE_PATH';
         }
 
@@ -1210,6 +1373,11 @@ class PlgSystemSecurityguard extends JPlugin
             $q = $this->db->getQuery(true)->delete($this->db->quoteName('#__securityguard_bot_cache'))
                 ->where($this->db->quoteName('verified_at') . ' < ' . ($now - 604800));
             $this->db->setQuery($q); $this->db->execute();
+            // Expired auto-trusted Super User IPs (hard cap 30 days)
+            $q = $this->db->getQuery(true)->delete($this->db->quoteName('#__securityguard_whitelist'))
+                ->where($this->db->quoteName('description') . ' = ' . $this->db->quote('sg-auto'))
+                ->where($this->db->quoteName('created_at') . ' < DATE_SUB(NOW(), INTERVAL 30 DAY)');
+            $this->db->setQuery($q); $this->db->execute();
         } catch (Exception $e) {}
     }
 
@@ -1306,7 +1474,16 @@ class PlgSystemSecurityguard extends JPlugin
             429 => '429 Too Many Requests',
             503 => '503 Service Unavailable',
         ];
-        $code = isset($codes[$this->responseCode]) ? $this->responseCode : 404;
+
+        // Brute-force lockouts get an honest 429 + a clear message instead of a
+        // silent 404, so an admin who just fat-fingered their password knows why.
+        if (stripos($reason, 'BRUTEFORCE') !== false) {
+            $code = 429;
+            $body = 'Too many failed login attempts from your IP address. Please try again later.';
+        } else {
+            $code = isset($codes[$this->responseCode]) ? $this->responseCode : 404;
+            $body = 'The page you are looking for cannot be accessed.';
+        }
         $msg = $codes[$code];
         if (!headers_sent()) {
             header("HTTP/1.1 $msg");
@@ -1314,7 +1491,7 @@ class PlgSystemSecurityguard extends JPlugin
         }
         echo "<!DOCTYPE html><html><head><title>$msg</title></head><body>";
         echo "<h1>$msg</h1>";
-        echo "<p>The page you are looking for cannot be accessed.</p>";
+        echo "<p>" . htmlspecialchars($body) . "</p>";
         echo "</body></html>";
         $this->app->close();
     }

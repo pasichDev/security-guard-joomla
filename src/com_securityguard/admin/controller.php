@@ -45,6 +45,40 @@ class SecurityguardController extends JControllerLegacy
         $this->setRedirect('index.php?option=com_securityguard&view=blocks', $msg, $type);
     }
 
+    /**
+     * Unblock the IP of the admin currently viewing the page (GUI recovery).
+     */
+    public function unblockMyIp()
+    {
+        if (!JFactory::getUser()->authorise('core.manage', 'com_securityguard')) {
+            jexit(JText::_('JERROR_ALERTNOAUTHOR'));
+        }
+        JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
+        $ip = SecurityguardHelper::getClientIp();
+        if (empty($ip)) {
+            $this->setRedirect('index.php?option=com_securityguard&view=blocks',
+                JText::_('COM_SECURITYGUARD_ERROR_NO_IP'), 'error');
+            return;
+        }
+        $db = JFactory::getDbo();
+        try {
+            $q = $db->getQuery(true)
+                ->delete($db->quoteName('#__securityguard_blocks'))
+                ->where($db->quoteName('ip') . ' = ' . $db->quote($ip));
+            $db->setQuery($q);
+            $db->execute();
+            // Also clear behavior score so the IP doesn't re-trip immediately
+            $q = $db->getQuery(true)
+                ->delete($db->quoteName('#__securityguard_scores'))
+                ->where($db->quoteName('ip') . ' = ' . $db->quote($ip));
+            $db->setQuery($q);
+            $db->execute();
+            $msg = JText::sprintf('COM_SECURITYGUARD_MSG_UNBLOCKED', $ip);
+            $type = 'message';
+        } catch (Exception $e) { $msg = $e->getMessage(); $type = 'error'; }
+        $this->setRedirect('index.php?option=com_securityguard&view=blocks', $msg, $type);
+    }
+
     public function clearBlocks()
     {
         if (!JFactory::getUser()->authorise('core.manage', 'com_securityguard')) {

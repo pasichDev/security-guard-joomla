@@ -11,6 +11,11 @@ $now = time();
 
 <div id="j-main-container" class="span10">
 
+    <div class="alert alert-info">
+        <?php echo JText::sprintf('COM_SECURITYGUARD_YOUR_IP',
+            '<code>' . htmlspecialchars(SecurityguardHelper::getClientIp(), ENT_QUOTES, 'UTF-8') . '</code>'); ?>
+    </div>
+
     <table class="table table-striped table-hover">
         <thead>
             <tr>

@@ -3,6 +3,19 @@ defined('_JEXEC') or die;
 
 abstract class SecurityguardHelper
 {
+    /**
+     * Best-effort current client IP for the admin UI. Mirrors the plugin:
+     * Cloudflare's CF-Connecting-IP if present and valid, else REMOTE_ADDR.
+     */
+    public static function getClientIp()
+    {
+        if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])
+            && filter_var($_SERVER['HTTP_CF_CONNECTING_IP'], FILTER_VALIDATE_IP)) {
+            return $_SERVER['HTTP_CF_CONNECTING_IP'];
+        }
+        return $_SERVER['REMOTE_ADDR'] ?? '';
+    }
+
     public static function addSubmenu($vName)
     {
         JHtmlSidebar::addEntry(JText::_('COM_SECURITYGUARD_SUBMENU_DASHBOARD'),
