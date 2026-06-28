@@ -403,34 +403,111 @@ class PlgSystemSecurityguard extends JPlugin
 
             // (call moved earlier — see step 7.5 below)
 
-            // 9. Admin area
-            if ($this->checkAdminAccess()) {
-                $this->logAttack('ADMIN_ACCESS_DENIED', 'BLOCKED');
-                $this->denyAccess('Admin area restricted');
-            }
-
-            // 10. Rate limit
+            // 9. Rate limit
             if ($this->checkRateLimit()) {
                 $this->blockIP('RATE_LIMIT_EXCEEDED');
                 $this->denyAccess('Rate limit exceeded');
             }
 
-            // 11. Behavior scoring
+            // 10. Behavior scoring
             if ($this->params->get('behavior_scoring', 1)) {
                 $this->updateBehaviorScore();
             }
 
-            // 12. Cleanup (FIX v1.3.1: more frequent — 5% chance)
+            // 11. Cleanup (FIX v1.3.1: more frequent — 5% chance)
             if (mt_rand(1, 20) === 1) {
                 $this->cleanupOldRecords();
             }
 
-            // 13. NEW v1.3: Traffic tracking (after WAF, only legit traffic)
+            // 12. NEW v1.3: Traffic tracking (after WAF, only legit traffic)
             // SECURITY FIX v1.3.1: skip static resources to avoid DB DDoS
             if ($this->params->get('traffic_monitor', 1) && !$this->isStaticResource()) {
                 $this->trackTrafficRequest('normal');
             }
 
+        } catch (Exception $e) {
+            JLog::add('SecurityGuard: ' . $e->getMessage(), JLog::ERROR, 'plg_securityguard');
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // BRUTE-FORCE LOGIN PROTECTION
+    // ════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Brute-force login protection. Joomla fires onUserLoginFailure on every
+     * failed login (backend AND frontend). We count failures per IP within a
+     * window; once the threshold is hit, the IP is blocked via the normal WAF
+     * path. The IP's NEXT request is then caught by isBlocked() → denyAccess().
+     *
+     * Failures are counted in #__securityguard_rate with a "bf:" marker, the
+     * same pattern used by the PHP-probe ("pp:") and return-throttle ("ret:")
+     * counters, so no new table is needed.
+     */
+    public function onUserLoginFailure($response = array())
+    {
+        if (!$this->params->get('bruteforce_enabled', 1)) {
+            return;
+        }
+
+        try {
+            // Never lock out a whitelisted IP
+            if ($this->isWhitelisted()) {
+                return;
+            }
+
+            // Distinguish backend vs frontend login for the logs
+            $isAdmin = method_exists($this->app, 'isClient')
+                ? $this->app->isClient('administrator')
+                : (method_exists($this->app, 'isAdmin') && $this->app->isAdmin());
+            $reason = $isAdmin ? 'ADMIN_BRUTEFORCE' : 'LOGIN_BRUTEFORCE';
+
+            $threshold = (int)$this->params->get('bruteforce_threshold', 5);
+            $window    = (int)$this->params->get('bruteforce_window', 900);
+            $now       = time();
+            $cutoff    = $now - $window;
+
+            $marker = 'bf:' . $this->ip;
+            if (strlen($marker) > 45) {
+                $marker = substr($marker, 0, 45);
+            }
+
+            // 1. Drop expired failures for this IP
+            $q = $this->db->getQuery(true)
+                ->delete($this->db->quoteName('#__securityguard_rate'))
+                ->where($this->db->quoteName('ip') . ' = ' . $this->db->quote($marker))
+                ->where($this->db->quoteName('timestamp') . ' < ' . $cutoff);
+            $this->db->setQuery($q);
+            $this->db->execute();
+
+            // 2. Record THIS failure
+            $q = $this->db->getQuery(true)
+                ->insert($this->db->quoteName('#__securityguard_rate'))
+                ->columns([$this->db->quoteName('ip'), $this->db->quoteName('timestamp')])
+                ->values($this->db->quote($marker) . ', ' . $now);
+            $this->db->setQuery($q);
+            $this->db->execute();
+
+            // 3. Count failures within the window
+            $q = $this->db->getQuery(true)
+                ->select('COUNT(*)')
+                ->from($this->db->quoteName('#__securityguard_rate'))
+                ->where($this->db->quoteName('ip') . ' = ' . $this->db->quote($marker));
+            $this->db->setQuery($q);
+            $count = (int)$this->db->loadResult();
+
+            if ($count >= $threshold) {
+                // Block the IP (escalating duration via blockIP) and reset counter
+                $this->blockIP($reason);
+                $q = $this->db->getQuery(true)
+                    ->delete($this->db->quoteName('#__securityguard_rate'))
+                    ->where($this->db->quoteName('ip') . ' = ' . $this->db->quote($marker));
+                $this->db->setQuery($q);
+                $this->db->execute();
+            } else {
+                // Not blocked yet — just log the failed attempt
+                $this->logAttack($reason . '_ATTEMPT', 'LOGIN_FAIL');
+            }
         } catch (Exception $e) {
             JLog::add('SecurityGuard: ' . $e->getMessage(), JLog::ERROR, 'plg_securityguard');
         }
@@ -1106,16 +1183,6 @@ class PlgSystemSecurityguard extends JPlugin
             }
         }
         return null;
-    }
-
-    private function checkAdminAccess()
-    {
-        if (!$this->params->get('admin_whitelist_only', 1)) return false;
-        $uri = $_SERVER['REQUEST_URI'] ?? '';
-        if (stripos($uri, '/administrator') !== 0 && stripos($uri, '/administrator/') === false) {
-            return false;
-        }
-        return !$this->isWhitelisted();
     }
 
     private function cleanupOldRecords()

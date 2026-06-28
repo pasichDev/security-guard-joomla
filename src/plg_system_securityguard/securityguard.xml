@@ -57,6 +57,22 @@
                        label="PLG_SYSTEM_SECURITYGUARD_FIELD_RATE_WINDOW" min="10" max="3600" />
             </fieldset>
 
+            <fieldset name="bruteforce" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_BRUTEFORCE">
+                <field name="bruteforce_enabled" type="radio" class="btn-group btn-group-yesno" default="1"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BRUTEFORCE_ENABLED"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_BRUTEFORCE_ENABLED_DESC">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
+                <field name="bruteforce_threshold" type="number" default="5"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BRUTEFORCE_THRESHOLD"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_BRUTEFORCE_THRESHOLD_DESC"
+                       min="2" max="50" />
+                <field name="bruteforce_window" type="number" default="900"
+                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_BRUTEFORCE_WINDOW"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_BRUTEFORCE_WINDOW_DESC"
+                       min="60" max="86400" />
+            </fieldset>
+
             <fieldset name="traffic" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_TRAFFIC">
                 <field name="traffic_monitor" type="radio" class="btn-group btn-group-yesno" default="1"
                        label="PLG_SYSTEM_SECURITYGUARD_FIELD_TRAFFIC_ON"
@@ -127,14 +143,10 @@
             </fieldset>
 
             <fieldset name="whitelist" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_WHITELIST">
-                <field name="whitelist_ips" type="textarea" rows="5" cols="60"
-                       default="45.158.247.&#10;92.52.152.&#10;46.201.131.&#10;127.0.0."
+                <field name="whitelist_ips" type="textarea" rows="5" cols="60" default=""
                        label="PLG_SYSTEM_SECURITYGUARD_FIELD_WHITELIST"
+                       description="PLG_SYSTEM_SECURITYGUARD_FIELD_WHITELIST_DESC"
                        filter="raw" />
-                <field name="admin_whitelist_only" type="radio" class="btn-group btn-group-yesno" default="1"
-                       label="PLG_SYSTEM_SECURITYGUARD_FIELD_ADMIN_WHITELIST">
-                    <option value="1">JYES</option><option value="0">JNO</option>
-                </field>
             </fieldset>
 
             <fieldset name="protections" label="PLG_SYSTEM_SECURITYGUARD_FIELDSET_PROTECTIONS">
