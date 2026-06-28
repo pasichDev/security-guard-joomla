@@ -3,6 +3,13 @@
 All notable changes are generated automatically from commit messages,
 following [Conventional Commits](https://www.conventionalcommits.org/).
 
+# [1.5.0](https://github.com/pasichDev/security-guard-joomla/compare/v1.4.0...v1.5.0) (2026-06-28)
+
+
+### Features
+
+* **waf:** trust backend, add lockout recovery, cut false positives ([834b5cc](https://github.com/pasichDev/security-guard-joomla/commit/834b5cca924fdd59cf6a19eeea9fca303eb8904e))
+
 # [1.4.0](https://github.com/pasichDev/security-guard-joomla/compare/v1.3.13...v1.4.0) (2026-06-28)
 
 
