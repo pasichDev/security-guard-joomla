@@ -73,6 +73,10 @@ Commits follow [Conventional Commits](docs/commit-convention.md) and drive autom
 releases. See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/](docs/). Issues and pull
 requests are welcome.
 
+## Security reports
+
+If you find a vulnerability, please **report it privately**, not in a public issue. See [SECURITY.md](SECURITY.md) for the reporting channel and scope.
+
 ## Support
 
 If this project helps secure your site, you can support its development:
