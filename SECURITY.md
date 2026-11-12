@@ -8,7 +8,7 @@ Security fixes are considered for the latest maintained release of Security Guar
 
 ## Reporting a vulnerability
 
-**Preferred:** use GitHub's [Report a vulnerability](https://github.com/pasichDev/security-guard-joomla/security/advisories/new) form in the repository's Security / Advisories section, when private vulnerability reporting is enabled.
+**Preferred:** use GitHub's [Report a vulnerability](https://github.com/pasichDev/security-guard-joomla/security/advisories/new) form in the repository's Security / Advisories section.
 
 **Fallback:** contact [apasichnik9@gmail.com](mailto:apasichnik9@gmail.com) directly with a short initial summary. Do not send secrets or production data in the first message; arrange a suitable confidential channel if the report requires them.
 
